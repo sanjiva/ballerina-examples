@@ -1,7 +1,7 @@
 import ballerina/config;
 import ballerina/io;
 
-function main(string[] args) {
+function main(string... args) {
     // Using the Ballerina config API, you can look up values from config files, CLI parameters,
     // environment variables, etc. The precedence order for config lookup is as follows: <br>
     // * CLI parameters <br>
@@ -50,9 +50,9 @@ function main(string[] args) {
 }
 
 function getLimit() returns (string) {
-    string limit = config:getAsString("sum.limit");
-    if (limit != ""){
-        return limit;
+    string sumLimit = config:getAsString("sum.limit");
+    if (sumLimit != ""){
+        return sumLimit;
     }
 
     io:println("Returning default limit: 1000");

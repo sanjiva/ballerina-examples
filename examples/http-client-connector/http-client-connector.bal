@@ -1,16 +1,15 @@
 import ballerina/io;
 import ballerina/http;
 import ballerina/mime;
-endpoint http:Client clientEndpoint {
-    targets: [{
-                  url: "https://postman-echo.com"
-              }]
-    };
 
-function main (string[] args) {
+endpoint http:Client clientEndpoint {
+    url:"https://postman-echo.com"
+};
+
+function main (string... args) {
 
     http:Request req = new;
-    // Send a GET request to the specified endpoint
+    // Send a GET request to the specified endpoint. 
     var response = clientEndpoint -> get("/get?test=123", req);
     match response {
         http:Response resp => {
@@ -110,7 +109,7 @@ function main (string[] args) {
     }
 
     req.setStringPayload("CUSTOM: Hello World");
-    // The execute() action can be used if one needs to use custom HTTP verbs.
+    // The `execute()` action can be used if one needs to use custom HTTP verbs.
     response = clientEndpoint -> execute("COPY", "/get", req);
 
     req = new;

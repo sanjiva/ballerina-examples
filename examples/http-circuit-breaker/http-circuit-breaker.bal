@@ -11,20 +11,16 @@ endpoint http:Listener backendEP {
 };
 
 endpoint http:Client backendClientEP {
+    url: "http://localhost:8080",
     circuitBreaker: {
         rollingWindow: {
-                            timeWindow:10000,
-                            bucketSize:2000
-                       },
+            timeWindowMillis:10000,
+            bucketSizeMillis:2000
+        },
         failureThreshold:0.2,
-        resetTimeMillies:10000,
+        resetTimeMillis:10000,
         statusCodes:[400, 404, 500]
     },
-    targets: [
-                 {
-                     url: "http://localhost:8080"
-                 }
-             ],
     timeoutMillis:2000
 };
 
@@ -37,16 +33,16 @@ service<http:Service> circuitbreaker bind passthruEP {
         methods:["GET"],
         path:"/"
     }
-    passthru (endpoint client, http:Request request) {
+    passthru (endpoint caller, http:Request request) {
         var backendRes = backendClientEP -> forward("/hello", request);
         match backendRes {
             http:Response res => {
-            _ = client -> respond(res);}
+            _ = caller -> respond(res);}
             http:HttpConnectorError httpConnectorError => {
             http:Response response = new;
             response.statusCode = 500;
             response.setStringPayload(httpConnectorError.message);
-            _ = client -> respond(response);}
+            _ = caller -> respond(response);}
         }
     }
 }
@@ -54,32 +50,33 @@ service<http:Service> circuitbreaker bind passthruEP {
 
 public  int counter = 1;
 
-// This sample service can be used to mock connection timeouts and service outages. Service outage can be mocked by stopping/starting this service.
-// This should be run separately from the circuitBreakerDemo service.
+// This sample service can be used to mock connection timeouts and service outages. 
+// Service outage can be mocked by stopping/starting this service.
+// This should be run separately from the `circuitBreakerDemo` service.
 @http:ServiceConfig {basePath:"/hello"}
 service<http:Service> helloWorld bind backendEP {
     @http:ResourceConfig {
         methods:["GET"],
         path:"/"
     }
-    sayHello (endpoint client, http:Request req) {
+    sayHello (endpoint caller, http:Request req) {
         if (counter % 5 == 0) {
             runtime:sleepCurrentWorker(5000);
             counter = counter + 1;
             http:Response res = new;
             res.setStringPayload("Hello World!!!");
-            _ = client -> respond(res);
+            _ = caller -> respond(res);
         } else if (counter % 5 == 3) {
             counter = counter + 1;
             http:Response res = new;
             res.statusCode = 500;
             res.setStringPayload("Internal error occurred while processing the request.");
-            _ = client -> respond(res);
+            _ = caller -> respond(res);
         } else {
             counter = counter + 1;
             http:Response res = new;
             res.setStringPayload("Hello World!!!");
-            _ = client -> respond(res);
+            _ = caller -> respond(res);
         }
     }
 }

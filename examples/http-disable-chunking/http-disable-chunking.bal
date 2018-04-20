@@ -8,13 +8,10 @@ endpoint http:Listener echoEP {
     port:9090
 };
 
-//Config client endpoint chunking behaviour by adding auto (default value), always or never to chunking option.
+//The HTTP client's chunking behaviour can be configured as auto, always, or never. In this example, it is set to as never, which means that chunking
+//never happens irrespective of how it is specified in the reqest. When chunking is set to auto, it is done as specified in the request.
 endpoint http:Client clientEndpoint {
-    targets: [
-        {
-           url: "http://localhost:9090"
-        }
-    ],
+    url: "http://localhost:9090",
     chunking: http:CHUNKING_NEVER
 };
 
@@ -22,40 +19,40 @@ endpoint http:Client clientEndpoint {
 }
 service<http:Service> chunkingSample bind chunkingEP {
 
-    @Description {value:"Server does a backend call using chunking disabled HttpClient"}
+    @Description {value:"The server does a backend call using chunking disabled HttpClient"}
     @http:ResourceConfig {
         path:"/"
     }
-    sample (endpoint conn, http:Request req) {
-        //Create new outbound request and set payload.
+    sample (endpoint caller, http:Request req) {
+        //Create a new outbound request and set the payload.
         http:Request newReq = new;
         newReq.setJsonPayload({"hello":"world!"});
         var result = clientEndpoint -> post("/echo/", newReq);
         match result {
             http:Response clientResponse => {
                 //Forward the inbound response.
-                _ = conn -> respond(clientResponse);
+                _ = caller -> respond(clientResponse);
             }
             http:HttpConnectorError err => {
                 http:Response errorResponse = new;
                 json errMsg = {"error":"error occurred while invoking the service"};
                 errorResponse.setJsonPayload(errMsg);
-                _ = conn -> respond(errorResponse);
+                _ = caller -> respond(errorResponse);
             }
         }
     }
 }
 
-@Description {value:"Sample backend which respond according chunking behaviour."}
+@Description {value:"A sample backend that responds according to chunking behaviour."}
 @http:ServiceConfig {
 }
 service<http:Service> echo bind echoEP {
     @http:ResourceConfig {
         path:"/"
     }
-    echoResource (endpoint conn, http:Request req) {
+    echoResource (endpoint caller, http:Request req) {
         string value;
-        //Set response according to the request headers.
+        //Set the response according to the request headers.
         if (req.hasHeader("content-length")) {
             value = "Lenght-" + req.getHeader("content-length");
         } else if (req.hasHeader("Transfer-Encoding")) {
@@ -65,6 +62,6 @@ service<http:Service> echo bind echoEP {
         }
         http:Response res = new;
         res.setJsonPayload({"Outbound request content":value});
-        _ = conn -> respond(res);
+        _ = caller -> respond(res);
     }
 }

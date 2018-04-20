@@ -47,28 +47,26 @@ service<http:Service> helloWorld bind helloWorldEP {
 
 //Create a new client endpoint to connect to the service endpoint you created above via mutual SSL.
 endpoint http:Client clientEP {
-    targets: [{
-        url: "https://localhost:9095",
-        secureSocket: {
-            keyStore: {
-                filePath: "${ballerina.home}/bre/security/ballerinaKeystore.p12",
-                password: "ballerina"
-            },
-            trustStore: {
-                filePath: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
-                password: "ballerina"
-            },
-            protocol: {
-                name: "TLS"
-            },
-            ciphers:["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"]
-        }
-    }]
+    url: "https://localhost:9095",
+    secureSocket: {
+        keyStore: {
+            filePath: "${ballerina.home}/bre/security/ballerinaKeystore.p12",
+            password: "ballerina"
+        },
+        trustStore: {
+            filePath: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
+            password: "ballerina"
+        },
+        protocol: {
+            name: "TLS"
+        },
+        ciphers:["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"]
+    }
 };
 @Description {value:"The Ballerina client connector can be used to connect to the created HTTPS server. You have to run
 the service before running this main function. As this is a mutual ssl connection, the client needs to provide the
 keyStoreFile, keyStorePassword, trustStoreFile, and trustStorePassword."}
-function main (string[] args) {
+function main (string... args) {
     //Create a request.
     http:Request req = new;
     var resp = clientEP -> get("/hello/", req);

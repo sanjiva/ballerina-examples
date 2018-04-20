@@ -24,26 +24,24 @@ service<http:Service> helloWorld bind helloWorldEP {
         path:"/"
     }
 
-    sayHello (endpoint conn, http:Request req) {
+    sayHello (endpoint caller, http:Request req) {
         http:Response res = new;
         res.setStringPayload("Successful");
-        _ = conn -> respond(res);
+        _ = caller -> respond(res);
     }
 }
 
 endpoint http:Client clientEP {
-    targets: [{
-        url: "https://localhost:9095",
-        secureSocket: {
-            trustStore: {
-                filePath: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
-                password: "ballerina"
-            }
+    url:"https://localhost:9095",
+    secureSocket:{
+        trustStore:{
+            filePath:"${ballerina.home}/bre/security/ballerinaTruststore.p12",
+            password:"ballerina"
         }
-    }]
+    }
 };
-@Description {value:"Ballerina client connector can be used to connect to the created https server. You have to run the service before running this main function. As this is a 1-way ssl connection, client needs to provide trustStoreFile and trustStorePassword."}
-function main (string[] args) {
+@Description {value:"The Ballerina client connector can be used to connect to the created HTTPS server. You have to run the service before running this main function. As this is a 1-way SSL connection, the client needs to provide values for ‘trustStoreFile’ and ‘trustStorePassword’."}
+function main (string... args) {
     //Creates an outbound request.
     http:Request req = new;
     var resp = clientEP -> get("/hello/", req);

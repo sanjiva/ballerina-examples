@@ -1,7 +1,7 @@
 import ballerina/io;
 import ballerina/http;
 
-@Description {value:"Attributes associated with the service endpoint is defined here."}
+@Description {value:"Attributes associated with the service endpoint are defined here."}
 endpoint http:Listener helloWorldEP {
     port:9090
 };
@@ -14,14 +14,14 @@ service<http:Service> helloWorld bind helloWorldEP{
     @http:ResourceConfig {
         path:"/"
     }
-    hello (endpoint outboundEP, http:Request request) {
+    hello (endpoint caller, http:Request request) {
         // Check if the client expects a 100-continue response.
         if (request.expects100Continue()) {
             // Send a 100-continue response to the client.
-            _ = outboundEP -> continue();
+            _ = caller -> continue();
         }
 
-        // The client will start sending the payload once it receives the 100-continue response. Get this payload sent by the client.
+        // The client starts sending the payload once it receives the 100-continue response. Retrieve the payload that is sent by the client.
         http:Response res = new;
         match request.getStringPayload() {
             string payload => {

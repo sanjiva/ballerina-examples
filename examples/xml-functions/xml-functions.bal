@@ -1,14 +1,16 @@
 import ballerina/io;
 
-function main (string[] args) {
+function main (string... args) {
     xml bookName = xml `<name>Book1</name>`;
     xml bookComment = xml `<!--some comment-->`;
     xml someText = xml `Hello, World!`;
     xml content = someText + bookName + bookComment;
 
     // Other than the XML literal syntax, XML can be parsed using a string. The string should be a valid XML.
-    string xmlString = "<book/>";
-    xml book = <xml>xmlString;
+    //TODO implement string to xml support or following code segment should be removed.
+    //string xmlString = "<book/>";
+    //xml book = <xml> xmlString;
+    xml book = xml `<book/>`;
 
     // Get the type of the XML element.
     io:println(bookComment.getItemType());
@@ -19,7 +21,7 @@ function main (string[] args) {
     // Get the text content of an XML element.
     io:println(bookName.getTextValue());
 
-    // Check if the XML element is emtpy.
+    // Check if the XML element is empty.
     io:println(content.isEmpty());
 
     // Check if the XML element has only one value.
@@ -29,24 +31,24 @@ function main (string[] args) {
     xml x = content.slice(2, 3);
     io:println(x);
 
-    // All the element-type items are taken from an XML sequence.
+    // Get all the element-type items in an XML sequence.
     x = content.elements();
     io:println(x);
 
-    // An XML element with a particular name can be retrieved.
+    // Retrieve an XML element by name.
     x = content.select("name");
     io:println(x);
 
-    // Set the children of an XML element.
+    // Set the child elements of an XML element.
     book.setChildren(content);
     io:println(book);
 
-    // Get all the children of an XML element.
+    // Get all the child elements of an XML element.
     x = book.*;
     io:println(x);
 
-    // Get a particular child of an XML element.
-    x = book.selectChildren("name");
+    // Retrieve a particular child of an XML element by name.
+    x = book.selectDescendants("name");
     io:println(x);
 
     // Remove any text items from an XML sequence that are all whitespace.

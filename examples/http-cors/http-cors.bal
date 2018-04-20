@@ -4,7 +4,7 @@ endpoint http:Listener crossOriginServiceEP {
     port:9092
 };
 
-@Description {value:"Service level CORS headers applies globally for each resource"}
+@Description {value:"Service-level CORS headers apply globally to each resource."}
 @http:ServiceConfig {
     cors: {
         allowOrigins :["http://www.m3.com", "http://www.hello.com"],
@@ -16,7 +16,7 @@ endpoint http:Listener crossOriginServiceEP {
 }
 service<http:Service> crossOriginService bind crossOriginServiceEP {
 
-    @Description {value:"CORS headers are defined at resource level are overrides the service level headers"}
+    @Description {value:"Resource-level CORS headers override the service-level CORS headers."}
     @http:ResourceConfig {
         methods:["GET"],
         path:"/company",
@@ -26,22 +26,22 @@ service<http:Service> crossOriginService bind crossOriginServiceEP {
             allowHeaders: ["X-Content-Type-Options", "X-PINGOTHER"]
         }
     }
-   companyInfo (endpoint conn, http:Request req) {
+   companyInfo (endpoint caller, http:Request req) {
         http:Response res = new;
         json responseJson = {"type":"middleware"};
         res.setJsonPayload(responseJson);
-        _ = conn -> respond(res);
+        _ = caller -> respond(res);
     }
 
-    @Description {value:"Service level CORS headers are applies to this resource as cors are not defined at resource level"}
+    @Description {value:"Service-level CORS headers are applied to this resource as resource-level CORS headers are not defined."}
     @http:ResourceConfig {
         methods:["POST"],
         path:"/lang"
     }
-    langInfo (endpoint conn, http:Request req) {
+    langInfo (endpoint caller, http:Request req) {
         http:Response res = new;
         json responseJson = {"lang":"Ballerina"};
         res.setJsonPayload(responseJson);
-        _ = conn -> respond(res);
+        _ = caller -> respond(res);
     }
 }
